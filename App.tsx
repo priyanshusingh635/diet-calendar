@@ -1,131 +1,72 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from "react";
+import { View, Text, Alert, StyleSheet } from "react-native";
+import { Calendar, DateData } from "react-native-calendars";
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+// Dynamic colors for better UI
+const colors = ["#FF5733", "#33FF57", "#5733FF", "#FF33A1", "#33FFF2", "#FFD700", "#FF8C00"];
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// Diet Data
+const dietData: { [key: string]: string } = {
+  "2025-03-24": "🍽️ Breakfast: Oats with banana & almonds\n🥗 Lunch: Grilled chicken with quinoa salad\n🍽️ Dinner: Baked salmon with steamed veggies",
+  "2025-03-25": "🍽️ Breakfast: Scrambled eggs with whole wheat toast\n🥗 Lunch: Lentil soup with mixed greens\n🍽️ Dinner: Stir-fried tofu with brown rice",
+  "2025-03-26": "🍽️ Breakfast: Greek yogurt with berries & chia seeds\n🥗 Lunch: Chickpea salad with feta & olives\n🍽️ Dinner: Grilled shrimp with sweet potato mash",
+  "2025-03-27": "🍽️ Breakfast: Smoothie (spinach, banana, protein powder)\n🥗 Lunch: Turkey wrap with hummus & veggies\n🍽️ Dinner: Baked cod with roasted Brussels sprouts",
+  "2025-03-28": "🍽️ Breakfast: Avocado toast with poached egg\n🥗 Lunch: Quinoa bowl with roasted vegetables\n🍽️ Dinner: Grilled steak with asparagus & quinoa",
+  "2025-03-29": "🍽️ Breakfast: Cottage cheese with walnuts & honey\n🥗 Lunch: Asian-style tofu stir-fry\n🍽️ Dinner: Spaghetti with lean turkey meatballs",
+  "2025-03-30": "🍽️ Breakfast: Pancakes (oats & banana-based)\n🥗 Lunch: Grilled chicken Caesar salad\n🍽️ Dinner: Mushroom risotto with a side of green beans",
+  "2025-03-31": "🍽️ Breakfast: Veggie omelet with whole-grain toast\n🥗 Lunch: Sushi rolls with miso soup\n🍽️ Dinner: Spicy chickpea curry with basmati rice",
+  "2025-04-01": "🍽️ Breakfast: Chia pudding with mango\n🥗 Lunch: Grilled salmon with couscous & greens\n🍽️ Dinner: Mediterranean lentil stew",
+};
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const App: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [themeColor, setThemeColor] = useState<string>("#FF5733"); // Default color
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  // Handle user tapping on a date
+  const handleDayPress = (day: DateData): void => {
+    setSelectedDate(day.dateString);
+    setThemeColor(colors[Math.floor(Math.random() * colors.length)]); // Random color
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+    // Fetch diet for the selected date
+    const dietPlan = dietData[day.dateString] || "No diet plan available for this date.";
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    // Show Alert with the diet plan
+    Alert.alert("Today's Goal", `📅 Date: ${day.dateString}\n\n${dietPlan}`);
   };
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
-
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <View style={styles.container}>
+      <Text style={[styles.title, { color: themeColor }]}>📆 Diet Calendar</Text>
+
+      <Calendar
+        onDayPress={handleDayPress}
+        markedDates={selectedDate ? { [selectedDate]: { selected: true, selectedColor: themeColor } } : {}}
+        theme={{
+          todayTextColor: themeColor,
+          arrowColor: themeColor,
+          selectedDayBackgroundColor: themeColor,
+          selectedDayTextColor: "#fff",
+        }}
       />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
+
+      {/* Show selected date in a text box */}
+      {selectedDate && (
+        <View style={[styles.textBox, { borderColor: themeColor }]}>
+          <Text style={[styles.textBoxTitle, { color: themeColor }]}>📅 Selected Date: {selectedDate}</Text>
+          <Text style={styles.textBoxText}>{dietData[selectedDate] || "No diet plan available."}</Text>
         </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      )}
     </View>
   );
-}
+};
 
+// Styles
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: "#f8f9fa" },
+  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
+  textBox: { padding: 15, marginTop: 20, borderWidth: 2, borderRadius: 10, backgroundColor: "#fff" },
+  textBoxTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 5, textAlign: "center" },
+  textBoxText: { fontSize: 16, textAlign: "center" },
 });
 
 export default App;
